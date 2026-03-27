@@ -15,5 +15,6 @@ spec:
       containers:
       - name: mindtrack
         image: vickyneduncheziyan/mindtrack:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
