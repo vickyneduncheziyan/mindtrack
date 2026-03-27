@@ -1,0 +1,45 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Installing kubectl...
+      - curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
+
+  pre_build:
+    commands:
+      - echo Logging in to Docker Hub...
+      - echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
+      - IMAGE_URI=$DOCKERHUB_USERNAME/mindtrack:$IMAGE_TAG
+      - echo Updating kubeconfig...
+      - aws eks update-kubeconfig --name mindtrack-cluster --region $AWS_DEFAULT_REGION
+
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker build -t $IMAGE_URI .
+      - docker tag $IMAGE_URI $DOCKERHUB_USERNAME/mindtrack:latest
+
+  post_build:
+    commands:
+      - echo Pushing image to Docker Hub...
+      - docker push $IMAGE_URI
+      - docker push $DOCKERHUB_USERNAME/mindtrack:latest
+      - echo Updating EKS deployment...
+      - kubectl set image deployment/mindtrack-deployment mindtrack=$IMAGE_URI
+      - kubectl rollout status deployment/mindtrack-deployment
+      - echo Deployment complete!
+
+artifacts:
+  files:
+    - k8s/**/*
+    - buildspec.yml
+
+logs:
+  cloudwatch:
+    group-name: /aws/codebuild/mindtrack-build
+    stream-name: build-log

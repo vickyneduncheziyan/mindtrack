@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mindtrack-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mindtrack
+  template:
+    metadata:
+      labels:
+        app: mindtrack
+    spec:
+      containers:
+      - name: mindtrack
+        image: vickyneduncheziyan/mindtrack:latest
+        ports:
+        - containerPort: 80

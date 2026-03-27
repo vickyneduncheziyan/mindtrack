@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mindtrack-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: mindtrack
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
