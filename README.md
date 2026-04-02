@@ -5,7 +5,7 @@ A complete step-by-step guide to containerize and deploy a static web applicatio
 
 ---
 
-## Table of Contents
+## Table of  Contents
 
 1. [Architecture Overview](#architecture-overview)
 2. [Prerequisites](#prerequisites)
